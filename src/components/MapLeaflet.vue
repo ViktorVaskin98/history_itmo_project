@@ -1,5 +1,15 @@
 <template>
-  <div id="map" style="height: 100%; width: 100%; z-index: 0;"></div>
+  <div class="relative h-full w-full">
+    <!-- Кнопки быстрого перемещения -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex gap-2 bg-[#faf8f5]/90 p-2 rounded-sm border border-stone-300 shadow-lg backdrop-blur-sm">
+      <button @click="flyTo(55.75, 37.61, 12)" class="px-4 py-1 text-sm font-sans font-bold text-stone-700 hover:bg-amber-700 hover:text-white transition rounded-sm">МОСКВА</button>
+      <button @click="flyTo(59.93, 30.31, 12)" class="px-4 py-1 text-sm font-sans font-bold text-stone-700 hover:bg-amber-700 hover:text-white transition rounded-sm">ПЕТЕРБУРГ</button>
+      <button @click="flyTo(56.83, 60.60, 12)" class="px-4 py-1 text-sm font-sans font-bold text-stone-700 hover:bg-amber-700 hover:text-white transition rounded-sm">УРАЛ</button>
+      <button @click="flyTo(57.5, 35.0, 6)" class="px-4 py-1 text-sm font-sans font-bold text-stone-500 hover:bg-stone-200 transition rounded-sm">ВЕСЬ МАСШТАБ</button>
+    </div>
+    
+    <div id="map" class="h-full w-full z-0"></div>
+  </div>
 </template>
 
 <script setup>
@@ -20,24 +30,37 @@ L.Icon.Default.mergeOptions({
 const router = useRouter()
 const store = useProjectsStore()
 
-onMounted(() => {
-  setTimeout(() => {
-    // Инициализация карты без дефолтного зума слева сверху
-    const map = L.map('map', {
-      zoomControl: false 
-    }).setView([57.5, 35.0], 6);
-    
-    // Добавляем красивый зум в правый нижний угол
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+// Глобальная переменная для карты
+let leafletMap = null;
 
-    // Подключаем светлую карту (под бумагу)
+// Функция полета (должна быть на верхнем уровне, чтобы шаблон ее видел)
+const flyTo = (lat, lng, zoom) => {
+  if (leafletMap) {
+    leafletMap.flyTo([lat, lng], zoom, {
+      animate: true,
+      duration: 1.5 // Плавный полет 1.5 секунды
+    });
+  }
+}
+
+onMounted(() => {
+  // Даем DOM дереву долю секунды на отрисовку div#map
+  setTimeout(() => {
+    
+    // 1. Инициализация карты
+    leafletMap = L.map('map', { zoomControl: false }).setView([57.5, 35.0], 6);
+    
+    // 2. Добавляем красивый зум в правый нижний угол
+    L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
+
+    // 3. Подключаем светлую карту (под бумагу)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap',
       subdomains: 'abcd',
       maxZoom: 18
-    }).addTo(map);
+    }).addTo(leafletMap);
 
-    // ИСТОРИЧЕСКИЕ ФУНДАМЕНТЫ (Отпечатки зданий на карте)
+    // 4. ИСТОРИЧЕСКИЕ ФУНДАМЕНТЫ (Отпечатки зданий на карте)
     const footprints = {
       'dvorec-sovetov': L.circle([55.7443, 37.6054], { radius: 140, color: '#c2410c', weight: 2, fillColor: '#c2410c', fillOpacity: 0.15 }),
       'bashnya-tatlina': L.circle([59.9479, 30.2905], { radius: 55, color: '#c2410c', weight: 2, fillColor: '#c2410c', fillOpacity: 0.15 }),
@@ -45,34 +68,36 @@ onMounted(() => {
         [55.7548, 37.6215], [55.7530, 37.6235],
         [55.7515, 37.6210], [55.7535, 37.6185]
       ], { color: '#c2410c', weight: 2, fillColor: '#c2410c', fillOpacity: 0.15 }),
-      'letayushij-gorod': L.circle([55.7558, 37.6173], { radius: 450, color: '#c2410c', weight: 2, dashArray: '10, 10', fillColor: '#c2410c', fillOpacity: 0.05 }), // Пунктирная огромная тень
+      'letayushij-gorod': L.circle([55.7558, 37.6173], { radius: 450, color: '#c2410c', weight: 2, dashArray: '10, 10', fillColor: '#c2410c', fillOpacity: 0.05 }), // Пунктирная тень
       'dvorec-truda': L.polygon([
         [55.7585, 37.6160], [55.7580, 37.6175],
         [55.7565, 37.6160], [55.7570, 37.6145]
-      ], { color: '#c2410c', weight: 2, fillColor: '#c2410c', fillOpacity: 0.15 })
+      ], { color: '#c2410c', weight: 2, fillColor: '#c2410c', fillOpacity: 0.15 }),
+      'teatr-sverdlovsk': L.circle([56.8389, 60.6057], { radius: 60, color: '#c2410c', weight: 2, fillColor: '#c2410c', fillOpacity: 0.15 }),
+      'dom-nauki-sibir': L.circle([55.0302, 82.9204], { radius: 40, color: '#c2410c', weight: 2, fillColor: '#c2410c', fillOpacity: 0.15 })
     };
 
-    // Проходимся по БД и ставим маркеры
+    // 5. Проходимся по БД и ставим маркеры
     store.getAllProjects.forEach((project, index) => {
       
-      // 1. Отрисовываем фундамент, если он есть
+      // Отрисовываем фундамент, если он есть
       if (footprints[project.id]) {
-        footprints[project.id].addTo(map);
+        footprints[project.id].addTo(leafletMap);
       }
 
-      // 2. Создаем кастомную иконку (красная капля с номером)
+      // Создаем кастомную иконку (красная капля с номером)
       const customIcon = L.divIcon({
         className: 'custom-div-icon',
         html: `<div class="marker-pin"></div><div class="marker-text">${index + 1}</div>`,
         iconSize: [30, 42],
         iconAnchor: [15, 42],
-        popupAnchor: [0, -35] // Чтобы окошко открывалось над маркером, а не перекрывало его
+        popupAnchor: [0, -35] // Чтобы окошко открывалось над маркером
       });
 
-      // 3. Ставим маркер
-      const marker = L.marker(project.coords, { icon: customIcon }).addTo(map);
+      // Ставим маркер
+      const marker = L.marker(project.coords, { icon: customIcon }).addTo(leafletMap);
       
-      // 4. Верстаем красивый поп-ап
+      // Верстаем поп-ап
       const popupContent = `
         <div class="text-center p-1 w-48">
           <h3 class="font-bold text-stone-800 text-lg mb-0 font-serif leading-tight">${project.title}</h3>
@@ -84,7 +109,7 @@ onMounted(() => {
       `;
       marker.bindPopup(popupContent);
 
-      // 5. Логика перехода при клике
+      // Логика перехода при клике
       marker.on('popupopen', () => {
         const btn = document.getElementById(`btn-${project.id}`);
         if (btn) {
@@ -95,10 +120,11 @@ onMounted(() => {
       });
     });
     
-    // Пересчет размеров при загрузке (чтобы не было серых зон)
-    map.invalidateSize();
-  }, 100);
-});
+    // Пересчет размеров при загрузке
+    leafletMap.invalidateSize();
+    
+  }, 100); // Закрываем setTimeout
+}); // Закрываем onMounted
 </script>
 
 <style>
@@ -128,7 +154,7 @@ onMounted(() => {
   width: 30px;
   height: 30px;
   border-radius: 50% 50% 50% 0;
-  background: #b45309; /* Исторический сургучный цвет */
+  background: #b45309;
   position: absolute;
   transform: rotate(-45deg);
   left: 50%;
@@ -139,7 +165,7 @@ onMounted(() => {
 }
 .marker-text {
   position: absolute;
-  top: 4px; /* Выравнивание номера внутри капли */
+  top: 4px;
   left: 0;
   width: 30px;
   color: #faf8f5;
