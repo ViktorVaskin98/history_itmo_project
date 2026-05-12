@@ -1,11 +1,9 @@
-<script setup></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <!-- bg-[#f4f1ea] - это идеальный цвет старой бумаги, text-stone-900 - цвет чернил -->
+  <div class="min-h-screen bg-[#f4f1ea] text-stone-900 font-sans">
+    <router-view />
+  </div>
 </template>
 
-<style scoped></style>
+<script setup>
+</script>
