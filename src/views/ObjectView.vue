@@ -11,13 +11,13 @@
 
     <div class="max-w-5xl mx-auto px-6 mt-8">
       <!-- Заголовок -->
-      <header class="mb-12 text-center border-b border-stone-300 pb-10">
+      <header data-aos="fade-down" class="mb-12 text-center border-b border-stone-300 pb-10">
         <h1 class="text-5xl md:text-7xl font-serif font-bold text-stone-800 mb-4">{{ project.title }}</h1>
         <p class="text-xl text-stone-600 font-serif italic">Архитектор: {{ project.architect }} | {{ project.year }} год</p>
       </header>
 
       <!-- Главная ИИ-картинка (Современность) -->
-      <section class="mb-16">
+      <section data-aos="fade-down" class="mb-16">
         <div class="relative w-full h-[60vh] rounded-sm overflow-hidden shadow-2xl border-4 border-white">
           <!-- Заглушка, пока нет реальных фоток. Удали bg-stone-300, когда вставишь src -->
           <img :src="project.images.modern" :alt="project.title" class="w-full h-full object-cover bg-stone-300" />
@@ -27,15 +27,35 @@
         </div>
       </section>
 
-      <!-- Текстовое описание -->
-      <section class="mb-16 max-w-3xl mx-auto">
-        <p class="text-lg leading-relaxed font-sans text-stone-700">
-          {{ project.fullDesc }}
-        </p>
-      </section>
+        <!-- Внутри <div class="max-w-5xl mx-auto ...">, после блока с главной картинкой -->
+
+<!-- Текстовое описание -->
+    <section class="mb-16 max-w-3xl mx-auto font-sans text-stone-700 text-lg leading-relaxed space-y-6">
+        <p>{{ project.fullDesc }}</p>
+  
+  <!-- НОВЫЕ БЛОКИ -->
+    <div class="border-t border-stone-300 pt-6">
+        <h3 class="font-serif text-2xl font-bold text-stone-800 mb-2">Контекст и замысел</h3>
+        <p>{{ project.context }}</p>
+    </div>
+    <div class="border-t border-stone-300 pt-6">
+        <h3 class="font-serif text-2xl font-bold text-stone-800 mb-2">Масштаб и местоположение</h3>
+        <p>{{ project.scale }} {{ project.locationDetails }}</p>
+    </div>
+    <div class="border-t border-stone-300 pt-6">
+        <h3 class="font-serif text-2xl font-bold text-stone-800 mb-2">Причина отмены и наследие</h3>
+        <p>{{ project.cancellationReason }} {{ project.legacy }}</p>
+    </div>
+    <div class="border-t border-stone-300 pt-6 bg-stone-100 p-6 rounded-sm">
+        <h3 class="font-serif text-2xl font-bold text-stone-800 mb-2">Что, если бы?..</h3>
+        <p class="italic">{{ project.whatIf }}</p>
+    </div>
+    </section>
+
+<!-- Дальше идет блок с картинками сравнения -->
 
       <!-- Блок сравнения: Чертеж и Историческая ИИ-фотка -->
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <section data-aos="fade-down" class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Чертеж -->
         <div class="flex flex-col">
           <div class="h-80 bg-stone-200 border border-stone-300 p-2 shadow-inner">

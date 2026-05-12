@@ -36,9 +36,17 @@ onMounted(() => {
       maxZoom: 19
     }).addTo(map);
 
-    store.getAllProjects.forEach(project => {
-      const marker = L.marker(project.coords).addTo(map);
-      
+    // Внутри forEach цикла
+    store.getAllProjects.forEach((project, index) => {
+  // Создаем кастомную иконку
+    const customIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div class="marker-pin"></div><div class="marker-text">${index + 1}</div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42]
+    });
+
+    const marker = L.marker(project.coords, { icon: customIcon }).addTo(map);
       // Красивый светлый поп-ап с кнопкой
       const popupContent = `
         <div class="text-center p-1">
@@ -83,5 +91,42 @@ onMounted(() => {
 .leaflet-popup-tip {
   background-color: #faf8f5 !important;
   border: 1px solid #d6d3d1 !important;
+}
+
+/* Внутри тега <style> файла MapLeaflet.vue */
+.custom-div-icon {
+  position: relative;
+  text-align: center;
+}
+.marker-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  background: #c2410c; /* Оранжево-красный цвет */
+  position: absolute;
+  transform: rotate(-45deg);
+  left: 50%;
+  top: 50%;
+  margin: -15px 0 0 -15px;
+  border: 1px solid white;
+}
+.marker-pin::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  margin: 8px 0 0 8px;
+  background: #ffffff;
+  position: absolute;
+  border-radius: 50%;
+}
+.marker-text {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: 30px;
+  color: #c2410c;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: 'Cormorant Garamond', serif;
 }
 </style>
