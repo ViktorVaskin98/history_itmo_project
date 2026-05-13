@@ -15,9 +15,12 @@
         <p class="text-lg md:text-xl font-sans max-w-3xl mx-auto mb-8">
           Интерактивная нейросетевая реконструкция нереализованных проектов советского авангарда 1920–1930-х годов
         </p>
-        <a href="#map-section" class="bg-amber-700 text-white px-8 py-3 rounded-sm hover:bg-amber-800 transition font-bold uppercase tracking-wider text-sm shadow-lg">
+        <button 
+          @click="scrollToMap" 
+          class="bg-amber-700 text-white px-8 py-3 rounded-sm hover:bg-amber-800 transition font-bold uppercase tracking-wider text-sm shadow-lg"
+        >
           Перейти к исследованию
-        </a>
+        </button>
       </div>
     </section>
 
@@ -37,4 +40,10 @@
 
 <script setup>
 import MapLeaflet from '../components/MapLeaflet.vue'
+const scrollToMap = () => {
+  const element = document.getElementById('map-section');
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+}
 </script>
