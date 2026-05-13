@@ -2,13 +2,18 @@
   <div>
     <!-- СЕКЦИЯ 1: ОБЛОЖКА -->
     <section class="h-screen w-full relative flex items-center justify-center text-center bg-stone-800">
-      <!-- Фоновое изображение (самое эпичное) -->
-      <div class="absolute top-0 left-0 w-full h-full bg-cover bg-center opacity-40" style="background-image: url('/img/dvorec_hist.jpg');"></div>
+      <div 
+        class="absolute top-0 left-0 w-full h-full bg-cover bg-center opacity-40" 
+        style="background-image: url('/img/hero-bg.jpg');">
+      </div>
       
+      <!-- Темный градиент для еще большей выразительности (по желанию) -->
+      <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70"></div>
+
       <div class="relative z-10 p-6 text-white" data-aos="fade-up">
         <h1 class="text-5xl md:text-8xl font-serif font-bold mb-4">Архитектурные утопии России</h1>
         <p class="text-lg md:text-xl font-sans max-w-3xl mx-auto mb-8">
-          Интерактивная нейросетевая реконструкция нереализованных проектов советского авангарда 1920–1930-х годов.
+          Интерактивная нейросетевая реконструкция нереализованных проектов советского авангарда 1920–1930-х годов
         </p>
         <a href="#map-section" class="bg-amber-700 text-white px-8 py-3 rounded-sm hover:bg-amber-800 transition font-bold uppercase tracking-wider text-sm shadow-lg">
           Перейти к исследованию
