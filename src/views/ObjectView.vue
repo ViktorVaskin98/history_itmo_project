@@ -3,7 +3,7 @@
     
     <!-- Навигация -->
     <nav class="p-6">
-      <button @click="router.push('/')" class="flex items-center text-stone-500 hover:text-amber-700 transition font-sans text-sm tracking-widest uppercase font-semibold">
+      <button @click="router.push({ path: '/', hash: '#map-section' })" class="flex items-center text-stone-500 hover:text-amber-700 transition font-sans text-sm tracking-widest uppercase font-semibold">
         <span>← Назад к карте</span>
       </button>
     </nav>
@@ -63,7 +63,7 @@
           <div class="h-80 bg-stone-200 border border-stone-300 p-2 shadow-inner cursor-zoom-in hover:shadow-md transition" @click="openLightbox(project.images.historical)">
             <img :src="project.images.historical" class="w-full h-full object-cover sepia-[.3]" alt="Историческая визуализация" />
           </div>
-          <p class="text-center text-sm mt-3 text-stone-500 font-serif italic">Историческая визуализация (1930-е)</p>
+          <p class="text-center text-sm mt-3 text-stone-500 font-serif italic">Историческая визуализация</p>
         </div>
       </section>
     </div>

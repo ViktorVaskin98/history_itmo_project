@@ -4,8 +4,9 @@
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex gap-2 bg-[#faf8f5]/90 p-2 rounded-sm border border-stone-300 shadow-lg backdrop-blur-sm">
       <button @click="flyTo(55.75, 37.61, 12)" class="px-4 py-1 text-sm font-sans font-bold text-stone-700 hover:bg-amber-700 hover:text-white transition rounded-sm">МОСКВА</button>
       <button @click="flyTo(59.93, 30.31, 12)" class="px-4 py-1 text-sm font-sans font-bold text-stone-700 hover:bg-amber-700 hover:text-white transition rounded-sm">ПЕТЕРБУРГ</button>
-      <button @click="flyTo(56.83, 60.60, 12)" class="px-4 py-1 text-sm font-sans font-bold text-stone-700 hover:bg-amber-700 hover:text-white transition rounded-sm">УРАЛ</button>
-      <button @click="flyTo(57.5, 35.0, 6)" class="px-4 py-1 text-sm font-sans font-bold text-stone-500 hover:bg-stone-200 transition rounded-sm">ВЕСЬ МАСШТАБ</button>
+      <button @click="flyTo(56.83, 60.60, 12)" class="px-4 py-1 text-sm font-sans font-bold text-stone-700 hover:bg-amber-700 hover:text-white transition rounded-sm">ЕКАТЕРИНБУРГ</button>
+      <button @click="flyTo(55.03, 82.92, 12)" class="px-4 py-1 text-sm font-sans font-bold text-stone-700 hover:bg-amber-700 hover:text-white transition rounded-sm">НОВОСИБИРСК</button>
+      <button @click="flyTo(57.5, 35.0, 4)" class="px-4 py-1 text-sm font-sans font-bold text-stone-500 hover:bg-stone-200 transition rounded-sm">ВЕСЬ МАСШТАБ</button>
     </div>
     
     <div id="map" class="h-full w-full z-0"></div>
@@ -18,6 +19,11 @@ import { useRouter } from 'vue-router'
 import { useProjectsStore } from '../stores/projects'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+
+// ИМПОРТЫ ДЛЯ КЛАСТЕРОВ
+import 'leaflet.markercluster';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 // Фикс стандартных иконок для сборки Vite
 delete L.Icon.Default.prototype._getIconUrl;
@@ -47,15 +53,14 @@ onMounted(() => {
   // Даем DOM дереву долю секунды на отрисовку div#map
   setTimeout(() => {
     
-    // 1. Инициализация карты
-    leafletMap = L.map('map', { zoomControl: false }).setView([57.5, 35.0], 6);
+    // 1. Инициализация карты (изменил начальный зум на 4 для лучшего вида)
+    leafletMap = L.map('map', { zoomControl: false, attributionControl: false }).setView([57.5, 35.0], 4);
     
     // 2. Добавляем красивый зум в правый нижний угол
     L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
 
     // 3. Подключаем светлую карту (под бумагу)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap',
       subdomains: 'abcd',
       maxZoom: 18
     }).addTo(leafletMap);
@@ -77,10 +82,27 @@ onMounted(() => {
       'dom-nauki-sibir': L.circle([55.0302, 82.9204], { radius: 40, color: '#c2410c', weight: 2, fillColor: '#c2410c', fillOpacity: 0.15 })
     };
 
-    // 5. Проходимся по БД и ставим маркеры
+    // 5. СОЗДАЕМ ГРУППУ КЛАСТЕРОВ
+    const markersGroup = L.markerClusterGroup({
+      maxClusterRadius: 30,
+      showCoverageOnHover: false, // Убираем синий многоугольник при наведении
+      zoomToBoundsOnClick: true,
+      spiderfyOnMaxZoom: true,
+      // Кастомный дизайн для сгруппированных точек
+      iconCreateFunction: function (cluster) {
+        const count = cluster.getChildCount();
+        return L.divIcon({
+          html: `<div class="cluster-inner"><span>${count}</span></div>`,
+          className: 'custom-cluster-icon',
+          iconSize: L.point(40, 40),
+        });
+      }
+    });
+
+    // 6. Проходимся по БД и ставим маркеры
     store.getAllProjects.forEach((project, index) => {
       
-      // Отрисовываем фундамент, если он есть
+      // Отрисовываем фундамент прямо на карту (их кластеризовать не нужно)
       if (footprints[project.id]) {
         footprints[project.id].addTo(leafletMap);
       }
@@ -94,8 +116,8 @@ onMounted(() => {
         popupAnchor: [0, -35] // Чтобы окошко открывалось над маркером
       });
 
-      // Ставим маркер
-      const marker = L.marker(project.coords, { icon: customIcon }).addTo(leafletMap);
+      // Ставим маркер, НО НЕ ДОБАВЛЯЕМ СРАЗУ НА КАРТУ
+      const marker = L.marker(project.coords, { icon: customIcon });
       
       // Верстаем поп-ап
       const popupContent = `
@@ -118,8 +140,14 @@ onMounted(() => {
           });
         }
       });
+
+      // ДОБАВЛЯЕМ МАРКЕР В КЛАСТЕРНУЮ ГРУППУ
+      markersGroup.addLayer(marker);
     });
     
+    // 7. ДОБАВЛЯЕМ ВСЮ ГРУППУ КЛАСТЕРОВ НА КАРТУ
+    leafletMap.addLayer(markersGroup);
+
     // Пересчет размеров при загрузке
     leafletMap.invalidateSize();
     
@@ -128,7 +156,7 @@ onMounted(() => {
 </script>
 
 <style>
-/* КИЛЛЕР-ФИЧА: Эффект старой карты (сепия + контраст) */
+/* Эффект старой карты (сепия + контраст) */
 .leaflet-layer {
   filter: sepia(0.4) contrast(0.95) brightness(0.95);
 }
@@ -165,12 +193,49 @@ onMounted(() => {
 }
 .marker-text {
   position: absolute;
-  top: 4px;
+  top: 9px;
   left: 0;
   width: 30px;
   color: #faf8f5;
   font-size: 14px;
   font-weight: bold;
   font-family: 'Montserrat', sans-serif;
+}
+
+/* =========================================
+   СТИЛИ ДЛЯ НОВЫХ КЛАСТЕРОВ (СГРУППИРОВАННЫХ ТОЧЕК)
+   ========================================= */
+.custom-cluster-icon {
+  background: none;
+  border: none;
+}
+
+.cluster-inner {
+  width: 44px;
+  height: 44px;
+  background-color: #b45309; /* Янтарный цвет, как у маркеров */
+  border: 3px solid #faf8f5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #faf8f5;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
+}
+
+.cluster-inner:hover {
+  transform: scale(1.1);
+  background-color: #92400e; /* Чуть темнее при наведении */
+}
+
+/* Линии "паутинки", когда маркеры разлетаются на максимальном зуме */
+.leaflet-cluster-spider-leg {
+  stroke: #b45309 !important;
+  stroke-opacity: 0.6;
+  stroke-width: 2px !important;
 }
 </style>

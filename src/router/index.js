@@ -16,7 +16,19 @@ const router = createRouter({
       name: 'object',
       component: ObjectView
     }
-  ]
+  ],
+  scrollBehavior(to, from, savedPosition) {
+    // 1. Если в адресе есть хэш (как наш #map-section)
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth', // Добавит плавную прокрутку, будет красиво
+      }
+    }
+    
+    // 2. Если мы просто переходим на новую страницу без хэша
+    return { top: 0 }
+  }
 })
 
 export default router
