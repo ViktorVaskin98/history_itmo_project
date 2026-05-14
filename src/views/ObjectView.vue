@@ -18,7 +18,7 @@
       <!-- Главная ИИ-картинка -->
       <section data-aos="fade-up" class="mb-16">
         <div class="relative w-full h-[60vh] rounded-sm overflow-hidden shadow-2xl border-4 border-white group cursor-zoom-in" @click="openLightbox(project.images.modern)">
-          <img :src="project.images.modern" :alt="project.title" class="w-full h-full object-cover transition duration-500 group-hover:scale-105" />
+          <img :src="getImg(project.images.modern)" :alt="project.title" class="w-full h-full object-cover transition duration-500 group-hover:scale-105" />
           <div class="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 text-xs tracking-wider backdrop-blur-sm pointer-events-none">
             Нейросетевая реконструкция (Современность)
           </div>
@@ -53,7 +53,7 @@
         <!-- Чертеж -->
         <div class="flex flex-col">
           <div class="h-80 bg-[#ebe7df] border border-stone-300 p-2 shadow-inner cursor-zoom-in hover:shadow-md transition" @click="openLightbox(project.images.blueprint)">
-            <img :src="project.images.blueprint" class="w-full h-full object-contain" alt="Чертеж" />
+            <img :src="getImg(project.images.blueprint)" class="w-full h-full object-contain" alt="Чертеж" />
           </div>
           <p class="text-center text-sm mt-3 text-stone-500 font-serif italic">Оригинальный проектный чертеж</p>
         </div>
@@ -61,7 +61,7 @@
         <!-- Историческая визуализация -->
         <div class="flex flex-col">
           <div class="h-80 bg-stone-200 border border-stone-300 p-2 shadow-inner cursor-zoom-in hover:shadow-md transition" @click="openLightbox(project.images.historical)">
-            <img :src="project.images.historical" class="w-full h-full object-cover sepia-[.3]" alt="Историческая визуализация" />
+            <img :src="getImg(project.images.historical)" class="w-full h-full object-cover sepia-[.3]" alt="Историческая визуализация" />
           </div>
           <p class="text-center text-sm mt-3 text-stone-500 font-serif italic">Историческая визуализация</p>
         </div>
@@ -72,7 +72,7 @@
     <transition name="fade">
       <div v-if="isLightboxOpen" class="fixed inset-0 z-[6000] bg-stone-900/95 flex items-center justify-center p-4 md:p-10 backdrop-blur-sm cursor-zoom-out" @click="closeLightbox">
         <button class="absolute top-6 right-8 text-white/50 hover:text-white text-5xl transition">&times;</button>
-        <img :src="currentImage" class="max-w-full max-h-full rounded-sm shadow-2xl border-4 border-stone-300" @click.stop />
+        <img :src="getImg(currentImage)" class="max-w-full max-h-full rounded-sm shadow-2xl border-4 border-stone-300" @click.stop />
       </div>
     </transition>
 
@@ -107,6 +107,9 @@ const openLightbox = (imgSrc) => {
 const closeLightbox = () => {
   isLightboxOpen.value = false
   document.body.style.overflow = 'auto' // Возвращаем скролл
+}
+const getImg = (path) => {
+  return import.meta.env.BASE_URL + path.replace(/^\//, '');
 }
 </script>
 

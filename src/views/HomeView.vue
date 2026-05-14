@@ -4,7 +4,7 @@
     <section class="h-screen w-full relative flex items-center justify-center text-center bg-stone-800">
       <div 
         class="absolute top-0 left-0 w-full h-full bg-cover bg-center opacity-40" 
-        style="background-image: url('/img/hero-bg.jpg');">
+        :style="{ backgroundImage: `url(${baseUrl}img/hero-bg.jpg)` }">
       </div>
       
       <!-- Темный градиент для еще большей выразительности (по желанию) -->
@@ -40,6 +40,7 @@
 
 <script setup>
 import MapLeaflet from '../components/MapLeaflet.vue'
+const baseUrl = import.meta.env.BASE_URL;
 const scrollToMap = () => {
   const element = document.getElementById('map-section');
   if (element) {
