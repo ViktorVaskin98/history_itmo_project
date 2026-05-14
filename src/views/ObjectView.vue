@@ -63,7 +63,7 @@
           <div class="h-80 bg-stone-200 border border-stone-300 p-2 shadow-inner cursor-zoom-in hover:shadow-md transition" @click="openLightbox(project.images.historical)">
             <img :src="getImg(project.images.historical)" class="w-full h-full object-cover sepia-[.3]" alt="Историческая визуализация" />
           </div>
-          <p class="text-center text-sm mt-3 text-stone-500 font-serif italic">Историческая визуализация</p>
+          <p class="text-center text-sm mt-3 text-stone-500 font-serif italic">Историческая визуализация (ИИ)</p>
         </div>
       </section>
     </div>
